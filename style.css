@@ -218,3 +218,18 @@ footer {
   font-size: 0.8rem;
   color: #64748b;
 }
+/* Resaltado temporal para nodos nuevos o encontrados */
+.node-highlight {
+  background: #facc15 !important;
+  color: #1e293b !important;
+  transform: scale(1.08);
+  transition: all 0.2s ease;
+}
+
+/* Para la pila (los elementos stack-item) */
+.stack-highlight {
+  background: #facc15 !important;
+  color: #1e293b !important;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}

@@ -6,13 +6,17 @@
   <title>Visualizador Interactivo: Estructuras y Algoritmos</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="icono.png" >
-  lin
 </head>
 <body>
 <div class="container">
   <h1>Proyecto Final: Visualizador Interactivo de Estructuras de Datos y Algoritmos</h1>
-  <div class="sub">Estructuras de Datos (Listas Enlazadas, Doble Enlace, Pila) + Algoritmos de Ordenamiento</div>
 
+  <div class="sub">Estructuras de Datos (Listas Enlazadas, Doble Enlace, Pila) + Algoritmos de Ordenamiento</div>
+<div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap;">
+  <button id="global-voice-btn" style="background: #8b5cf6;">🔊 Introducción general</button>
+  <button id="pause-voice-btn" style="background: #f59e0b;">⏸️ Pausar voz</button>
+  <button id="resume-voice-btn" style="background: #10b981;">▶️ Reanudar voz</button>
+</div>
   <div class="tabs">
     <button class="tab-btn active" data-tab="sll">🔗 Lista Enlazada Simple</button>
     <button class="tab-btn" data-tab="dll">🔄 Lista Doblemente Enlazada</button>
@@ -109,105 +113,241 @@
 </div>
 
 <script>
-  // ---------- SINGLY LINKED LIST ----------
-  let singlyList = [];
-  function renderSingly() {
-    const container = document.getElementById('sll-visual');
-    if(singlyList.length === 0) { container.innerHTML = '<div class="node-list">⬅️ null (vacía) ➡️</div>'; return; }
-    let html = '<div class="node-list">';
-    singlyList.forEach((val, idx) => { html += `<div class="node">${val}</div>`; if(idx !== singlyList.length-1) html += `<span class="arrow">→</span>`; });
-    html += '</div>'; container.innerHTML = html;
-  }
-  document.getElementById('sll-add-head').onclick = () => { let val = document.getElementById('sll-value').value.trim() || "null"; singlyList.unshift(val); renderSingly(); };
-  document.getElementById('sll-add-tail').onclick = () => { let val = document.getElementById('sll-value').value.trim() || "null"; singlyList.push(val); renderSingly(); };
-  document.getElementById('sll-remove').onclick = () => { let val = document.getElementById('sll-value').value.trim(); singlyList = singlyList.filter(item => item != val); renderSingly(); };
-  document.getElementById('sll-search').onclick = () => { let val = document.getElementById('sll-value').value.trim(); let idx = singlyList.findIndex(item => item == val); alert(idx !== -1 ? `✅ Encontrado en posición ${idx+1}` : `❌ No encontrado`); };
-
-  // ---------- DOUBLY LINKED LIST ----------
-  let doublyList = [];
-  function renderDoubly() {
-    const container = document.getElementById('dll-visual');
-    if(doublyList.length === 0) { container.innerHTML = '<div class="node-list">⇄ vacía ⇄</div>'; return; }
-    let html = '<div class="node-list">';
-    doublyList.forEach((val, idx) => { html += `<div class="node node-dll">${val}</div>`; if(idx !== doublyList.length-1) html += `<span class="arrow">⇄</span>`; });
-    html += '</div>'; container.innerHTML = html;
-  }
-  document.getElementById('dll-add-head').onclick = () => { let val = document.getElementById('dll-value').value.trim() || "node"; doublyList.unshift(val); renderDoubly(); };
-  document.getElementById('dll-add-tail').onclick = () => { let val = document.getElementById('dll-value').value.trim() || "node"; doublyList.push(val); renderDoubly(); };
-  document.getElementById('dll-remove').onclick = () => { let val = document.getElementById('dll-value').value.trim(); doublyList = doublyList.filter(v => v != val); renderDoubly(); };
-  document.getElementById('dll-search').onclick = () => { let val = document.getElementById('dll-value').value.trim(); alert(doublyList.includes(val) ? `✅ "${val}" está` : `❌ "${val}" no existe`); };
-
-  // ---------- STACK ----------
-  let stackArr = [];
-  function renderStack() {
-    const container = document.getElementById('stack-visual');
-    if(stackArr.length === 0) { container.innerHTML = '<div class="stack-container">⬇️ Pila vacía (tope⬇️)</div>'; return; }
-    let html = '<div class="stack-container">';
-    [...stackArr].reverse().forEach(item => { html += `<div class="stack-item">${item}</div>`; });
-    html += '<div style="border-top: 2px solid gray; width:100px; text-align:center;">🔝 tope</div></div>';
-    container.innerHTML = html;
-  }
-  document.getElementById('stack-push').onclick = () => { let val = document.getElementById('stack-value').value.trim() || "elem"; stackArr.push(val); renderStack(); };
-  document.getElementById('stack-pop').onclick = () => { if(stackArr.length) stackArr.pop(); else alert("Pila vacía"); renderStack(); };
-  document.getElementById('stack-peek').onclick = () => { alert(stackArr.length ? `Tope: ${stackArr[stackArr.length-1]}` : "Vacía"); };
-
-  // ---------- ALGORITHMS (Merge & Quick) ----------
-  let currentAlgo = 'merge';
-  let originalArray = [12, 5, 8, 3, 9, 1, 7, 4];
-  let steps = [];
-  let currentStepIdx = 0;
-  let animInterval = null;
-  let isPlaying = false;
-  const speedSlider = document.getElementById('speed-range');
-  
-  function generateMergeSortSteps(arr) {
-    let stepsArr = [], workingArr = [...arr];
-    function record(desc, highlights=[]) { stepsArr.push({ array: [...workingArr], desc, highlights }); }
-    record("Estado inicial - Merge Sort");
-    function merge(l, m, r) {
-      let left = workingArr.slice(l, m+1), right = workingArr.slice(m+1, r+1);
-      let i=0,j=0,k=l;
-      while(i<left.length && j<right.length) { workingArr[k] = (left[i] <= right[j]) ? left[i++] : right[j++]; record(`Mezclando [${l}..${r}]`, [k]); k++; }
-      while(i<left.length) { workingArr[k]=left[i++]; record(`Copiando izquierda`, [k]); k++; }
-      while(j<right.length) { workingArr[k]=right[j++]; record(`Copiando derecha`, [k]); k++; }
+let singlyList = [10, 20, 30];
+function renderSingly() {
+  const container = document.getElementById('sll-visual');
+  if(!container) return;
+  if(singlyList.length === 0) { container.innerHTML = '<div class="node-list">⬅️ null (vacía) ➡️</div>'; return; }
+  let html = '<div class="node-list">';
+  singlyList.forEach((val, idx) => {
+    html += `<div class="node" data-idx="${idx}">${val}</div>`;
+    if(idx !== singlyList.length-1) html += `<span class="arrow">→</span>`;
+  });
+  html += '</div>'; container.innerHTML = html;
+}
+document.getElementById('sll-add-head')?.addEventListener('click', () => {
+  let val = document.getElementById('sll-value')?.value.trim() || "null";
+  singlyList.unshift(val);
+  renderSingly();
+  setTimeout(() => {
+    const firstNode = document.querySelector('#sll-visual .node:first-child');
+    if(firstNode) firstNode.classList.add('node-highlight');
+    setTimeout(() => firstNode?.classList.remove('node-highlight'), 700);
+  }, 10);
+});
+document.getElementById('sll-add-tail')?.addEventListener('click', () => {
+  let val = document.getElementById('sll-value')?.value.trim() || "null";
+  singlyList.push(val);
+  renderSingly();
+  setTimeout(() => {
+    const nodes = document.querySelectorAll('#sll-visual .node');
+    const lastNode = nodes[nodes.length-1];
+    if(lastNode) lastNode.classList.add('node-highlight');
+    setTimeout(() => lastNode?.classList.remove('node-highlight'), 700);
+  }, 10);
+});
+document.getElementById('sll-remove')?.addEventListener('click', () => {
+  let val = document.getElementById('sll-value')?.value.trim();
+  singlyList = singlyList.filter(item => item != val);
+  renderSingly();
+});
+document.getElementById('sll-search')?.addEventListener('click', () => {
+  let val = document.getElementById('sll-value')?.value.trim();
+  let idx = singlyList.findIndex(item => item == val);
+  if(idx !== -1) {
+    alert(`✅ Encontrado en posición ${idx+1}`);
+    const nodes = document.querySelectorAll('#sll-visual .node');
+    if(nodes[idx]) {
+      nodes[idx].classList.add('node-highlight');
+      setTimeout(() => nodes[idx].classList.remove('node-highlight'), 1000);
     }
-    function mergeSortRec(l, r) { if(l<r) { let m = Math.floor((l+r)/2); record(`Dividir [${l}..${m}] y [${m+1}..${r}]`, [l,r]); mergeSortRec(l,m); mergeSortRec(m+1,r); merge(l,m,r); } }
-    mergeSortRec(0, workingArr.length-1);
-    record("Merge Sort finalizado", []);
-    return stepsArr;
-  }
-  function generateQuickSortSteps(arr) {
-    let stepsArr = [], workingArr = [...arr];
-    function record(desc, highlights=[]) { stepsArr.push({ array: [...workingArr], desc, highlights }); }
-    record("Inicio Quick Sort - pivote último");
-    function partition(l, r) {
-      let pivot = workingArr[r], i = l-1;
-      for(let j=l; j<r; j++) if(workingArr[j] <= pivot) { i++; [workingArr[i], workingArr[j]] = [workingArr[j], workingArr[i]]; record(`Intercambio pivote ${pivot}`, [i,j]); }
-      [workingArr[i+1], workingArr[r]] = [workingArr[r], workingArr[i+1]];
-      record(`Pivote colocado en ${i+1}`, [i+1]); return i+1;
+  } else alert(`❌ No encontrado`);
+});
+
+// ---------- DOUBLY LINKED LIST ----------
+let doublyList = ["5","15","25"];
+function renderDoubly() {
+  const container = document.getElementById('dll-visual');
+  if(!container) return;
+  if(doublyList.length === 0) { container.innerHTML = '<div class="node-list">⇄ vacía ⇄</div>'; return; }
+  let html = '<div class="node-list">';
+  doublyList.forEach((val, idx) => {
+    html += `<div class="node node-dll" data-idx="${idx}">${val}</div>`;
+    if(idx !== doublyList.length-1) html += `<span class="arrow">⇄</span>`;
+  });
+  html += '</div>'; container.innerHTML = html;
+}
+document.getElementById('dll-add-head')?.addEventListener('click', () => {
+  let val = document.getElementById('dll-value')?.value.trim() || "node";
+  doublyList.unshift(val);
+  renderDoubly();
+  setTimeout(() => {
+    const firstNode = document.querySelector('#dll-visual .node:first-child');
+    if(firstNode) firstNode.classList.add('node-highlight');
+    setTimeout(() => firstNode?.classList.remove('node-highlight'), 700);
+  }, 10);
+});
+document.getElementById('dll-add-tail')?.addEventListener('click', () => {
+  let val = document.getElementById('dll-value')?.value.trim() || "node";
+  doublyList.push(val);
+  renderDoubly();
+  setTimeout(() => {
+    const nodes = document.querySelectorAll('#dll-visual .node');
+    const lastNode = nodes[nodes.length-1];
+    if(lastNode) lastNode.classList.add('node-highlight');
+    setTimeout(() => lastNode?.classList.remove('node-highlight'), 700);
+  }, 10);
+});
+document.getElementById('dll-remove')?.addEventListener('click', () => {
+  let val = document.getElementById('dll-value')?.value.trim();
+  doublyList = doublyList.filter(v => v != val);
+  renderDoubly();
+});
+document.getElementById('dll-search')?.addEventListener('click', () => {
+  let val = document.getElementById('dll-value')?.value.trim();
+  let idx = doublyList.findIndex(v => v == val);
+  if(idx !== -1) {
+    alert(`✅ "${val}" encontrado en posición ${idx+1}`);
+    const nodes = document.querySelectorAll('#dll-visual .node');
+    if(nodes[idx]) {
+      nodes[idx].classList.add('node-highlight');
+      setTimeout(() => nodes[idx].classList.remove('node-highlight'), 1000);
     }
-    function quickRec(l, r) { if(l<r) { let pi = partition(l,r); record(`Partición hecha, recursivo`, [pi]); quickRec(l, pi-1); quickRec(pi+1, r); } }
-    quickRec(0, workingArr.length-1);
-    record("Quick Sort terminado", []);
-    return stepsArr;
+  } else alert(`❌ "${val}" no existe`);
+});
+
+// ---------- STACK ----------
+let stackArr = ["🥇", "🥈", "🥉"];
+function renderStack() {
+  const container = document.getElementById('stack-visual');
+  if(!container) return;
+  if(stackArr.length === 0) { container.innerHTML = '<div class="stack-container">⬇️ Pila vacía (tope⬇️)</div>'; return; }
+  let html = '<div class="stack-container">';
+  [...stackArr].reverse().forEach((item, idx) => {
+    html += `<div class="stack-item" data-idx="${idx}">${item}</div>`;
+  });
+  html += '<div style="border-top: 2px solid gray; width:100px; text-align:center;">🔝 tope</div></div>';
+  container.innerHTML = html;
+}
+document.getElementById('stack-push')?.addEventListener('click', () => {
+  let val = document.getElementById('stack-value')?.value.trim() || "elem";
+  stackArr.push(val);
+  renderStack();
+  setTimeout(() => {
+    const items = document.querySelectorAll('#stack-visual .stack-item');
+    const lastItem = items[items.length-1];
+    if(lastItem) {
+      lastItem.classList.add('stack-highlight');
+      setTimeout(() => lastItem.classList.remove('stack-highlight'), 700);
+    }
+  }, 10);
+});
+document.getElementById('stack-pop')?.addEventListener('click', () => {
+  if(stackArr.length) { stackArr.pop(); renderStack(); }
+  else alert("Pila vacía");
+});
+document.getElementById('stack-peek')?.addEventListener('click', () => {
+  alert(stackArr.length ? `Tope: ${stackArr[stackArr.length-1]}` : "Vacía");
+});
+
+// ---------- ALGORITMOS (MERGE / QUICK) ----------
+let currentAlgo = 'merge';
+let originalArray = [12, 5, 8, 3, 9, 1, 7, 4];
+let steps = [];
+let currentStepIdx = 0;
+let animInterval = null;
+let isPlaying = false;
+const speedSlider = document.getElementById('speed-range');
+
+function generateMergeSortSteps(arr) {
+  let stepsArr = [], workingArr = [...arr];
+  function record(desc, highlights=[]) { stepsArr.push({ array: [...workingArr], desc, highlights }); }
+  record("Estado inicial - Merge Sort");
+  function merge(l, m, r) {
+    let left = workingArr.slice(l, m+1), right = workingArr.slice(m+1, r+1);
+    let i=0,j=0,k=l;
+    while(i<left.length && j<right.length) {
+      workingArr[k] = (left[i] <= right[j]) ? left[i++] : right[j++];
+      record(`Mezclando [${l}..${r}]`, [k]);
+      k++;
+    }
+    while(i<left.length) { workingArr[k]=left[i++]; record(`Copiando izquierda`, [k]); k++; }
+    while(j<right.length) { workingArr[k]=right[j++]; record(`Copiando derecha`, [k]); k++; }
   }
-  function loadAlgorithmSteps() { steps = currentAlgo === 'merge' ? generateMergeSortSteps([...originalArray]) : generateQuickSortSteps([...originalArray]); currentStepIdx = 0; renderArrayVisual(); updateCodeHighlight(); }
-  function renderArrayVisual() {
-    const container = document.getElementById('array-visual');
-    let currentArr = steps[currentStepIdx].array, highlights = steps[currentStepIdx].highlights || [], maxVal = Math.max(...currentArr, 5);
-    container.innerHTML = '';
-    currentArr.forEach((val, idx) => { let barHeight = (val / maxVal) * 150 + 20; let bar = document.createElement('div'); bar.className = 'bar'; bar.style.height = barHeight + 'px'; bar.style.backgroundColor = highlights.includes(idx) ? '#f97316' : '#3b82f6'; bar.innerText = val; container.appendChild(bar); });
-    document.getElementById('step-desc').innerHTML = `Paso ${currentStepIdx+1}/${steps.length}: ${steps[currentStepIdx].desc}`;
+  function mergeSortRec(l, r) {
+    if(l<r) {
+      let m = Math.floor((l+r)/2);
+      record(`Dividir [${l}..${m}] y [${m+1}..${r}]`, [l,r]);
+      mergeSortRec(l,m);
+      mergeSortRec(m+1,r);
+      merge(l,m,r);
+    }
   }
-  function updateCodeHighlight() {
-    const mergeCode = `function mergeSort(arr) {
+  mergeSortRec(0, workingArr.length-1);
+  record("Merge Sort finalizado", []);
+  return stepsArr;
+}
+function generateQuickSortSteps(arr) {
+  let stepsArr = [], workingArr = [...arr];
+  function record(desc, highlights=[]) { stepsArr.push({ array: [...workingArr], desc, highlights }); }
+  record("Inicio Quick Sort - pivote último");
+  function partition(l, r) {
+    let pivot = workingArr[r], i = l-1;
+    for(let j=l; j<r; j++) {
+      if(workingArr[j] <= pivot) {
+        i++;
+        [workingArr[i], workingArr[j]] = [workingArr[j], workingArr[i]];
+        record(`Intercambio pivote ${pivot}`, [i,j]);
+      }
+    }
+    [workingArr[i+1], workingArr[r]] = [workingArr[r], workingArr[i+1]];
+    record(`Pivote colocado en ${i+1}`, [i+1]);
+    return i+1;
+  }
+  function quickRec(l, r) {
+    if(l<r) {
+      let pi = partition(l,r);
+      record(`Partición hecha, recursivo`, [pi]);
+      quickRec(l, pi-1);
+      quickRec(pi+1, r);
+    }
+  }
+  quickRec(0, workingArr.length-1);
+  record("Quick Sort terminado", []);
+  return stepsArr;
+}
+function loadAlgorithmSteps() {
+  steps = currentAlgo === 'merge' ? generateMergeSortSteps([...originalArray]) : generateQuickSortSteps([...originalArray]);
+  currentStepIdx = 0;
+  renderArrayVisual();
+  updateCodeHighlight();
+}
+function renderArrayVisual() {
+  const container = document.getElementById('array-visual');
+  if(!steps.length) return;
+  let currentArr = steps[currentStepIdx].array, highlights = steps[currentStepIdx].highlights || [], maxVal = Math.max(...currentArr, 5);
+  container.innerHTML = '';
+  currentArr.forEach((val, idx) => {
+    let barHeight = (val / maxVal) * 150 + 20;
+    let bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = barHeight + 'px';
+    bar.style.backgroundColor = highlights.includes(idx) ? '#f97316' : '#3b82f6';
+    bar.innerText = val;
+    container.appendChild(bar);
+  });
+  const stepDesc = document.getElementById('step-desc');
+  if(stepDesc) stepDesc.innerHTML = `Paso ${currentStepIdx+1}/${steps.length}: ${steps[currentStepIdx].desc}`;
+}
+function updateCodeHighlight() {
+  const mergeCode = `function mergeSort(arr) {
   if (arr.length <= 1) return arr;
   const mid = Math.floor(arr.length/2);
   const left = mergeSort(arr.slice(0,mid));
   const right = mergeSort(arr.slice(mid));
   return merge(left, right);
 }`;
-    const quickCode = `function quickSort(arr) {
+  const quickCode = `function quickSort(arr) {
   if(arr.length <= 1) return arr;
   let pivot = arr[arr.length-1];
   let left = [], right = [];
@@ -215,44 +355,224 @@
     if(arr[i] < pivot) left.push(arr[i]); else right.push(arr[i]);
   return [...quickSort(left), pivot, ...quickSort(right)];
 }`;
-    document.getElementById('code-panel').innerHTML = `<pre style="margin:0">${currentAlgo === 'merge' ? mergeCode : quickCode}</pre>`;
+  const panel = document.getElementById('code-panel');
+  if(panel) panel.innerHTML = `<pre style="margin:0">${currentAlgo === 'merge' ? mergeCode : quickCode}</pre>`;
+}
+function nextStep() {
+  if(currentStepIdx < steps.length-1) {
+    currentStepIdx++;
+    renderArrayVisual();
+  } else {
+    if(isPlaying) stopAnimation();
+    alert("Algoritmo finalizado");
   }
-  function nextStep() { if(currentStepIdx < steps.length-1) { currentStepIdx++; renderArrayVisual(); } else { if(isPlaying) stopAnimation(); alert("Algoritmo finalizado"); } }
-  function prevStep() { if(currentStepIdx > 0) { currentStepIdx--; renderArrayVisual(); } }
-  function startPlay() { if(isPlaying) return; isPlaying = true; animInterval = setInterval(() => { if(currentStepIdx < steps.length-1) nextStep(); else stopAnimation(); }, 550 - (speedSlider.valueAsNumber || 500)); }
-  function stopAnimation() { if(animInterval) clearInterval(animInterval); isPlaying = false; }
-  function resetArrayRandom() { stopAnimation(); originalArray = Array.from({length: 8}, () => Math.floor(Math.random() * 40) + 5); loadAlgorithmSteps(); }
-  document.getElementById('algo-select').addEventListener('change', (e) => { currentAlgo = e.target.value; resetArrayRandom(); });
-  document.getElementById('random-array').onclick = resetArrayRandom;
-  document.getElementById('play-btn').onclick = startPlay;
-  document.getElementById('pause-btn').onclick = stopAnimation;
-  document.getElementById('step-forward').onclick = () => { stopAnimation(); nextStep(); };
-  document.getElementById('step-backward').onclick = () => { stopAnimation(); prevStep(); };
-  speedSlider.onchange = () => { if(isPlaying) { stopAnimation(); startPlay(); } };
+}
+function prevStep() {
+  if(currentStepIdx > 0) {
+    currentStepIdx--;
+    renderArrayVisual();
+  }
+}
+function startPlay() {
+  if(isPlaying) return;
+  isPlaying = true;
+  animInterval = setInterval(() => {
+    if(currentStepIdx < steps.length-1) nextStep();
+    else stopAnimation();
+  }, 550 - (speedSlider?.valueAsNumber || 500));
+}
+function stopAnimation() {
+  if(animInterval) clearInterval(animInterval);
+  isPlaying = false;
+}
+function resetArrayRandom() {
+  stopAnimation();
+  originalArray = Array.from({length: 8}, () => Math.floor(Math.random() * 40) + 5);
+  loadAlgorithmSteps();
+}
+document.getElementById('algo-select')?.addEventListener('change', (e) => { currentAlgo = e.target.value; resetArrayRandom(); });
+document.getElementById('random-array')?.addEventListener('click', resetArrayRandom);
+document.getElementById('play-btn')?.addEventListener('click', startPlay);
+document.getElementById('pause-btn')?.addEventListener('click', stopAnimation);
+document.getElementById('step-forward')?.addEventListener('click', () => { stopAnimation(); nextStep(); });
+document.getElementById('step-backward')?.addEventListener('click', () => { stopAnimation(); prevStep(); });
+speedSlider?.addEventListener('change', () => { if(isPlaying) { stopAnimation(); startPlay(); } });
 
-  // QUIZ
-  const quizData = { question: "¿Cuál es la complejidad temporal de buscar un elemento en una lista enlazada simple?", options: ["O(1)", "O(n)", "O(log n)", "O(n²)"], correct: 1 };
-  function loadQuiz() {
-    document.getElementById('quiz-question').innerText = quizData.question;
-    const optDiv = document.getElementById('quiz-options');
+// ---------- QUIZ ----------
+const quizData = { question: "¿Cuál es la complejidad temporal de buscar un elemento en una lista enlazada simple?", options: ["O(1)", "O(n)", "O(log n)", "O(n²)"], correct: 1 };
+function loadQuiz() {
+  const qDiv = document.getElementById('quiz-question');
+  if(qDiv) qDiv.innerText = quizData.question;
+  const optDiv = document.getElementById('quiz-options');
+  if(optDiv) {
     optDiv.innerHTML = '';
-    quizData.options.forEach((opt, idx) => { optDiv.innerHTML += `<label><input type="radio" name="quiz" value="${idx}"> ${opt}</label><br>`; });
+    quizData.options.forEach((opt, idx) => {
+      optDiv.innerHTML += `<label><input type="radio" name="quiz" value="${idx}"> ${opt}</label><br>`;
+    });
   }
-  document.getElementById('submit-quiz').onclick = () => { let selected = document.querySelector('input[name="quiz"]:checked'); if(!selected) { document.getElementById('quiz-feedback').innerText = "Selecciona una respuesta"; return; } let ans = parseInt(selected.value); document.getElementById('quiz-feedback').innerHTML = ans === quizData.correct ? "✅ ¡Correcto! O(n)" : "❌ Incorrecto. La respuesta es O(n)."; };
-  
-  function drawComplexityChart() {
-    const canvas = document.getElementById('complexityChart');
-    if(!canvas) return; const ctx = canvas.getContext('2d'); canvas.width = 400; canvas.height = 180;
-    ctx.fillStyle="#fff"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.beginPath(); ctx.moveTo(40,150); ctx.lineTo(360,150); ctx.stroke();
-    ctx.fillText("Tamaño entrada", 180, 170); ctx.fillText("Tiempo", 10, 20);
-    ctx.beginPath(); for(let x=0; x<=320; x++) { let n = x/8; let y = 150 - (n * Math.log2(n+1)) * 0.3; if(x===0) ctx.moveTo(40+x, y); else ctx.lineTo(40+x, y); } ctx.strokeStyle="#3b82f6"; ctx.stroke(); ctx.fillStyle="#3b82f6"; ctx.fillText("Merge O(n log n)", 50, 40);
-    ctx.beginPath(); for(let x=0; x<=320; x++) { let n = x/8; let y = 150 - (n * Math.log2(n+1))*0.32; if(x===0) ctx.moveTo(40+x, y); else ctx.lineTo(40+x, y); } ctx.strokeStyle="#f97316"; ctx.stroke(); ctx.fillStyle="#f97316"; ctx.fillText("Quick O(n log n) prom", 50, 60);
+}
+document.getElementById('submit-quiz')?.addEventListener('click', () => {
+  let selected = document.querySelector('input[name="quiz"]:checked');
+  if(!selected) {
+    document.getElementById('quiz-feedback').innerText = "Selecciona una respuesta";
+    return;
   }
-  
-  // TABS & INIT
-  const tabs = document.querySelectorAll('.tab-btn'), panes = document.querySelectorAll('.tab-pane');
-  tabs.forEach(btn => { btn.addEventListener('click', () => { const tabId = btn.getAttribute('data-tab'); tabs.forEach(b => b.classList.remove('active')); panes.forEach(p => p.classList.remove('active')); btn.classList.add('active'); document.getElementById(tabId).classList.add('active'); if(tabId === 'sort') loadAlgorithmSteps(); if(tabId === 'edu') drawComplexityChart(); }); });
-  singlyList = [10, 20, 30]; doublyList = [5, 15, 25]; stackArr = ["🥇", "🥈", "🥉"]; renderSingly(); renderDoubly(); renderStack(); loadAlgorithmSteps(); loadQuiz(); drawComplexityChart();
+  let ans = parseInt(selected.value);
+  document.getElementById('quiz-feedback').innerHTML = ans === quizData.correct ? "✅ ¡Correcto! O(n)" : "❌ Incorrecto. La respuesta es O(n).";
+});
+function drawComplexityChart() {
+  const canvas = document.getElementById('complexityChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = 400; canvas.height = 180;
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.beginPath(); ctx.moveTo(40,150); ctx.lineTo(360,150); ctx.stroke();
+  ctx.fillText("Tamaño entrada", 180, 170); ctx.fillText("Tiempo", 10, 20);
+  ctx.beginPath();
+  for(let x=0; x<=320; x++) {
+    let n = x/8;
+    let y = 150 - (n * Math.log2(n+1)) * 0.3;
+    if(x===0) ctx.moveTo(40+x, y);
+    else ctx.lineTo(40+x, y);
+  }
+  ctx.strokeStyle="#3b82f6"; ctx.stroke();
+  ctx.fillStyle="#3b82f6"; ctx.fillText("Merge O(n log n)", 50, 40);
+  ctx.beginPath();
+  for(let x=0; x<=320; x++) {
+    let n = x/8;
+    let y = 150 - (n * Math.log2(n+1))*0.32;
+    if(x===0) ctx.moveTo(40+x, y);
+    else ctx.lineTo(40+x, y);
+  }
+  ctx.strokeStyle="#f97316"; ctx.stroke();
+  ctx.fillStyle="#f97316"; ctx.fillText("Quick O(n log n) prom", 50, 60);
+}
+
+// ===================== SISTEMA DE VOZ (SIN BOTÓN DETENER) =====================
+let lastSpokenText = '';
+let currentUtterance = null;
+let isVoicePaused = false;
+
+function stopVoice() {
+  if(window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    currentUtterance = null;
+    isVoicePaused = false;
+  }
+}
+
+function speakText(text) {
+  stopVoice();
+  lastSpokenText = text;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'es-ES';
+  utterance.rate = 0.9;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+  utterance.onend = () => {
+    currentUtterance = null;
+    isVoicePaused = false;
+  };
+  currentUtterance = utterance;
+  window.speechSynthesis.speak(utterance);
+}
+
+function pauseVoice() {
+  if(currentUtterance && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    isVoicePaused = true;
+  }
+}
+
+function resumeVoice() {
+  if(isVoicePaused && lastSpokenText) {
+    speakText(lastSpokenText);
+    isVoicePaused = false;
+  }
+}
+
+// Textos explicativos
+const explanations = {
+  sll: "Lista Enlazada Simple. Cada nodo tiene un valor y un puntero al siguiente nodo. Puedes agregar elementos al inicio o al final, eliminar por valor y buscar. La inserción al inicio es rápida, pero buscar requiere recorrer desde la cabeza. Observa las flechas que conectan los nodos.",
+  dll: "Lista Doblemente Enlazada. Cada nodo tiene dos punteros, uno al siguiente y otro al anterior. Permite recorrer en ambas direcciones. Las flechas dobles representan esa bidireccionalidad.",
+  stack: "Pila o Stack. Es una estructura LIFO, el último en entrar es el primero en salir. Puedes apilar con Push, desapilar con Pop y ver el tope con Peek.",
+  sort: "Algoritmos de ordenamiento. Merge Sort divide y mezcla, siempre O n log n. Quick Sort elige un pivote, promedio O n log n pero en el peor caso O n cuadrado. Usa los controles para ver paso a paso.",
+  edu: "Mejora educativa. Aquí tienes un gráfico de complejidad temporal y un cuestionario interactivo para evaluar lo aprendido."
+};
+
+// Función para agregar botones de voz automáticamente a cada pestaña
+function agregarBotonesVoz() {
+  const panes = document.querySelectorAll('.tab-pane');
+  panes.forEach(pane => {
+    const id = pane.id;
+    if(explanations[id] && !pane.querySelector('.tab-voice-btn')) {
+      const btn = document.createElement('button');
+      btn.textContent = '🔊 Explicar esta sección';
+      btn.className = 'tab-voice-btn';
+      btn.setAttribute('data-tab', id);
+      btn.style.marginBottom = '10px';
+      btn.style.backgroundColor = '#8b5cf6';
+      btn.style.borderRadius = '40px';
+      btn.style.padding = '6px 16px';
+      btn.style.border = 'none';
+      btn.style.color = 'white';
+      btn.style.cursor = 'pointer';
+      const h2 = pane.querySelector('h2');
+      if(h2 && h2.nextSibling) {
+        pane.insertBefore(btn, h2.nextSibling);
+      } else {
+        pane.prepend(btn);
+      }
+    }
+  });
+  document.querySelectorAll('.tab-voice-btn').forEach(btn => {
+    btn.removeEventListener('click', voiceClickHandler);
+    btn.addEventListener('click', voiceClickHandler);
+  });
+}
+function voiceClickHandler(e) {
+  const tab = e.currentTarget.getAttribute('data-tab');
+  if(explanations[tab]) speakText(explanations[tab]);
+}
+
+// Botón introducción global
+const globalBtn = document.getElementById('global-voice-btn');
+if(globalBtn) {
+  globalBtn.addEventListener('click', () => {
+    const intro = "Bienvenido al Visualizador Interactivo de Estructuras de Datos y Algoritmos. Este proyecto te permite explorar listas enlazadas simples, listas doblemente enlazadas, pilas, algoritmos de ordenamiento Merge Sort y Quick Sort, y una sección educativa con gráficos y cuestionario. Interactúa con las pestañas y los botones para aprender visualmente. ¡Disfruta la experiencia!";
+    speakText(intro);
+  });
+}
+document.getElementById('pause-voice-btn')?.addEventListener('click', pauseVoice);
+document.getElementById('resume-voice-btn')?.addEventListener('click', resumeVoice);
+
+// ===================== INICIALIZACIÓN DE TABS Y ESTRUCTURAS =====================
+const tabs = document.querySelectorAll('.tab-btn');
+const panes = document.querySelectorAll('.tab-pane');
+tabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    stopVoice();
+    const tabId = btn.getAttribute('data-tab');
+    tabs.forEach(b => b.classList.remove('active'));
+    panes.forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+    if(tabId === 'sort') loadAlgorithmSteps();
+    if(tabId === 'edu') drawComplexityChart();
+  });
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  agregarBotonesVoz();
+  renderSingly();
+  renderDoubly();
+  renderStack();
+  loadAlgorithmSteps();
+  loadQuiz();
+  drawComplexityChart();
+});
+</script>
+
 </script>
 </body>
 </html>

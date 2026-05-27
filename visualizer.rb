@@ -1,10 +1,3 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
-
-# Visualizador en consola de estructuras de datos y algoritmos (Ruby)
-# Ejecutar: ruby visualizer.rb
-
-# Soporte para colores ANSI en terminal
 class String
   def colorize(color_code)
     "\e[#{color_code}m#{self}\e[0m"
@@ -18,9 +11,7 @@ class String
   def cyan; colorize(36); end
 end
 
-# ------------------------------------------------------------
-# Lista Enlazada Simple (Singly Linked List)
-# ------------------------------------------------------------
+
 class SinglyLinkedList
   Node = Struct.new(:value, :next)
 
